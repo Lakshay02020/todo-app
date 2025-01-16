@@ -1,8 +1,7 @@
 package com.example.todo_app.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.example.todo_app.constants.TaskStatus;
+import jakarta.persistence.*;
 import lombok.Data;
 
 @Data
@@ -10,6 +9,10 @@ import lombok.Data;
 @Table(name = "todo")
 public class Task {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long taskId;
     private String taskDescription;
+
+    @Enumerated(EnumType.STRING)
+    private TaskStatus taskStatus;
 }
