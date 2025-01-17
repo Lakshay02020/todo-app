@@ -4,6 +4,8 @@ import ch.qos.logback.core.util.StringUtil;
 import com.example.todo_app.constants.TaskStatus;
 import com.example.todo_app.dto.TaskDto;
 import com.example.todo_app.entity.Task;
+import com.example.todo_app.handler.EntityNotFoundException;
+import com.example.todo_app.handler.InvalidDtoException;
 import com.example.todo_app.repository.TaskRepository;
 import com.example.todo_app.service.TaskService;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
@@ -38,37 +41,31 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public Task updateTask(long taskId ,TaskDto taskDto){
         Optional<Task> getTask = taskRepository.findById(taskId);
+
         if(getTask.isEmpty()){
-            // Throw Error
-            // Invalid Request
-        }else {
-            Task task = getTask.get();
-            if(!StringUtil.isNullOrEmpty(taskDto.getTaskDescription())){
-                log.info("Updated Description");
-                task.setTaskDescription(taskDto.getTaskDescription());
-            }
-
-            if(!StringUtil.isNullOrEmpty(taskDto.getTaskStatus())){
-                log.info("Updated Status");
-                task.setTaskStatus(TaskStatus.valueOf(taskDto.getTaskStatus()));
-            }
-
-            taskRepository.save(task);
-            log.info("Update Successful: {}", task);
-            return task;
+            throw new EntityNotFoundException("Task", String.valueOf(taskId));
         }
 
-        log.info("Update unsuccessful");
-        return null;
+        Task task = getTask.get();
+        if(!StringUtil.isNullOrEmpty(taskDto.getTaskDescription())){
+            task.setTaskDescription(taskDto.getTaskDescription());
+        }
+
+        if(!StringUtil.isNullOrEmpty(taskDto.getTaskStatus())){
+            task.setTaskStatus(TaskStatus.valueOf(taskDto.getTaskStatus()));
+        }
+
+        taskRepository.save(task);
+        log.info("Update Successful: {}", task);
+        return task;
     }
 
     @Override
     public String deleteTask(long taskId){
         Optional<Task> getTask = taskRepository.findById(taskId);
+
         if(getTask.isEmpty()){
-            // Throw Error
-            // Invalid Request
-            return "Task with Task Id not found";
+            throw new EntityNotFoundException("Task", String.valueOf(taskId));
         }
 
         taskRepository.delete(getTask.get());
