@@ -35,4 +35,10 @@ public class TaskController {
         log.info("Task with id : {}, and request {}", taskId, taskDto);
         return taskService.updateTask(taskId, taskDto);
     }
+
+    @DeleteMapping(value = "/task/{taskId}")
+    public String deleteTask(@PathVariable Long taskId){
+        log.info("Task Deletion request with id: {}", taskId);
+        return taskService.deleteTask(taskId);
+    }
 }

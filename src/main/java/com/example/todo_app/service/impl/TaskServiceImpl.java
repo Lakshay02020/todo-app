@@ -61,4 +61,17 @@ public class TaskServiceImpl implements TaskService {
         log.info("Update unsuccessful");
         return null;
     }
+
+    @Override
+    public String deleteTask(long taskId){
+        Optional<Task> getTask = taskRepository.findById(taskId);
+        if(getTask.isEmpty()){
+            // Throw Error
+            // Invalid Request
+            return "Task with Task Id not found";
+        }
+
+        taskRepository.delete(getTask.get());
+        return "Task Deleted Successfully";
+    }
 }
