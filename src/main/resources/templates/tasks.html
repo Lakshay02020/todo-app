@@ -1,11 +1,41 @@
 <!DOCTYPE html>
-<!--This is called namespace-->
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Todo List</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse; /* Ensures borders between cells are collapsed */
+        }
+
+        th, td {
+            border: 1px solid black; /* Adds a solid border to the table cells */
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2; /* Light gray background for headers */
+        }
+    </style>
 </head>
 <body>
-    <h1> Todo Application </h1>
+<h1>Todo Application</h1>
+<table border="1">
+    <thead>
+    <tr>
+        <th>Description</th>
+        <th>Status</th>
+    </tr>
+    </thead>
+    <tbody>
+    <!-- Iterating through the list of tasks -->
+    <tr th:each="task : ${tasks}">
+        <td th:text="${task.taskDescription}">Task Description</td>
+        <td th:text="${task.taskStatus}">Task Status</td>
+    </tr>
+    </tbody>
+</table>
 </body>
 </html>
