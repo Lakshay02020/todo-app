@@ -42,9 +42,12 @@
         <tr th:each="task : ${tasks}">
             <td th:text="${task.taskDescription}"></td>
             <td>
-                <span th:text="${task.taskStatus}"></span>
-                <form method="post" th:action="@{/changeStatus(taskId=${task.taskId})}" class="inline-form d-flex justify-content-between align-items-center">
-                    <button type="submit" class="btn btn-sm btn-outline-primary">Change Status</button>
+                <form method="post" th:action="@{/frontend/update}" th:object="${taskDto}" class="inline-form">
+                    <select th:field="*{taskStatus}" th:field=*"{taskId}" onchange="this.form.submit()">
+                        <option th:value="PENDING" th:selected="${task.taskStatus == 'PENDING'}">Pending</option>
+                        <option th:value="HOLD" th:selected="${task.taskStatus == 'HOLD'}">On Hold</option>
+                        <option th:value="COMPLETED" th:selected="${task.taskStatus == 'COMPLETED'}">Completed</option>
+                    </select>
                 </form>
             </td>
             <td>

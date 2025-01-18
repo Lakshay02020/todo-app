@@ -25,6 +25,7 @@ public class FrontendTaskController {
         log.info("Received get request");
         List<Task> tasks = taskService.getTasks();
         model.addAttribute("tasks", tasks);
+        model.addAttribute("newStatus", new String());
         model.addAttribute("taskDto", new TaskDto());
         return "tasks";
     }

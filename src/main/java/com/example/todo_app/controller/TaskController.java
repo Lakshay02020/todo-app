@@ -6,6 +6,7 @@ import com.example.todo_app.repository.TaskRepository;
 import com.example.todo_app.service.TaskService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
