@@ -5,7 +5,7 @@ import com.example.todo_app.constants.TaskStatus;
 import com.example.todo_app.dto.TaskDto;
 import com.example.todo_app.entity.Task;
 import com.example.todo_app.handler.EntityNotFoundException;
-import com.example.todo_app.handler.InvalidDtoException;
+
 import com.example.todo_app.repository.TaskRepository;
 import com.example.todo_app.service.TaskService;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
