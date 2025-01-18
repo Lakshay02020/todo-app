@@ -2,40 +2,51 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Todo List</title>
-    <style>
-        table {
-            width: 100%;
-            border-collapse: collapse; /* Ensures borders between cells are collapsed */
-        }
-
-        th, td {
-            border: 1px solid black; /* Adds a solid border to the table cells */
-            padding: 8px;
-            text-align: left;
-        }
-
-        th {
-            background-color: #f2f2f2; /* Light gray background for headers */
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<h1>Todo Application</h1>
-<table border="1">
-    <thead>
-    <tr>
-        <th>Description</th>
-        <th>Status</th>
-    </tr>
-    </thead>
-    <tbody>
-    <!-- Iterating through the list of tasks -->
-    <tr th:each="task : ${tasks}">
-        <td th:text="${task.taskDescription}">Task Description</td>
-        <td th:text="${task.taskStatus}">Task Status</td>
-    </tr>
-    </tbody>
-</table>
+<div class="container">
+    <h1>Todo Application</h1>
+    <form method="post" action="#" th:action="@{/frontend/add}" th:object="${taskDto}" class="add-task-form">
+        <input type="text" th:field="*{taskDescription}" placeholder="Enter a new task" required>
+        <select th:field="*{taskStatus}">
+            <option value="PENDING">Pending</option>
+            <option value="HOLD">On Hold</option>
+            <option value="COMPLETED">Completed</option>
+        </select>
+        <button type="submit">Add Task</button>
+    </form>
+    <table>
+        <thead>
+        <tr>
+            <th>Description</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+            <!-- Iterating through the list of tasks -->
+            <tr th:each="task : ${tasks}">
+                <td th:text="${task.taskDescription}"></td>
+                <td>
+                    <span th:text="${task.taskStatus}"></span>
+                    <form method="post" th:action="@{/changeStatus(taskId=${task.taskId})}" class="inline-form">
+                        <button type="submit">Change Status</button>
+                    </form>
+                </td>
+                <td>
+                    <form method="get" th:action="@{/editTask(taskId=${task.taskId})}" class="inline-form">
+                        <button type="submit">Edit</button>
+                    </form>
+                    <form method="post" th:action="@{/frontend/task/delete/{taskId}(taskId=${task.taskId})}" class="inline-form">
+                        <button type="submit">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
 </body>
 </html>
