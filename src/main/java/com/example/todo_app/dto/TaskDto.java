@@ -9,4 +9,5 @@ public class TaskDto {
     private long taskId;
     private String taskDescription;
     private String taskStatus;
+    private String taskPriority;
 }
