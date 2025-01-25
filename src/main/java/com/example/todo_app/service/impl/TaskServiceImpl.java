@@ -11,6 +11,9 @@ import com.example.todo_app.repository.TaskRepository;
 import com.example.todo_app.service.TaskService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,9 +26,14 @@ public class TaskServiceImpl implements TaskService {
     TaskRepository taskRepository;
 
     @Override
-    public List<Task> getTasks(){
-        List<Task> tasks = taskRepository.findAll();
-        log.info("Tasks: {}", tasks);
+    public List<Task> getTasks(Integer pageNumber, Integer pageSize){
+        // Pagination
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<Task> pagesOfTask = taskRepository.findAll(pageable);
+
+        List<Task> tasks = pagesOfTask.getContent();
+        log.info("List of tasks on page no {}, Tasks: {}", pageNumber, tasks);
+
         return tasks;
     }
 
