@@ -1,92 +1,60 @@
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f9f9f9;
+    background-color: lightblue;
+    background: linear-gradient(to right, #74ebd5, #acb6e5); /* Soft gradient background */
+    color: #333;
+    font-family: 'Arial', sans-serif;
     margin: 0;
     padding: 0;
+    min-height: 100vh;
 }
 
 .container {
-    max-width: 800px;
-    margin: 50px auto;
-    padding: 20px;
-    background: #ffffff;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    margin-top: 50px;
+    margin-bottom: 50px;
 }
 
 h1 {
-    text-align: center;
-    color: #333;
-}
-
-.add-task-form {
-    display: flex;
-    gap: 10px;
+    font-size: 2.5rem;
     margin-bottom: 20px;
 }
 
-.add-task-form input[type="text"] {
-    flex-grow: 1;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+.add-task-form input,
+.add-task-form select {
+    margin-right: 10px;
 }
 
 .add-task-form button {
-    padding: 10px 15px;
-    background-color: #28a745;
-    color: white;
+    background: #007bff;
     border: none;
-    border-radius: 4px;
+    padding: 10px 20px;
+    color: #fff;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: background 0.3s;
 }
 
 .add-task-form button:hover {
-    background-color: #218838;
+    background: #0056b3;
 }
 
-.inline-form {
-    display: inline;
+.table-striped tbody tr:hover {
+    background: rgba(0, 123, 255, 0.1);
 }
 
-.inline-form button {
-    padding: 5px 10px;
-    margin: 0 2px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.inline-form button:first-of-type {
-    background-color: #007bff;
-    color: white;
-}
-
-.inline-form button:first-of-type:hover {
-    background-color: #0056b3;
-}
-
-.inline-form button:last-of-type {
-    background-color: #dc3545;
-    color: white;
-}
-
-.inline-form button:last-of-type:hover {
-    background-color: #c82333;
-}
-
-.table {
+.footer {
+    background-color: #343a40;
+    color: #ffffff;
+    padding: 15px 0;
+    text-align: center;
+    position: relative;
+    bottom: 0;
     width: 100%;
-    border-collapse: collapse;
 }
 
-th, td {
-    padding: 10px;
-    border: 1px solid #ddd;
-}
-
-th {
-    background-color: #f2f2f2;
-    text-align: left;
+.footer p {
+    margin: 0;
+    font-size: 0.9rem;
 }

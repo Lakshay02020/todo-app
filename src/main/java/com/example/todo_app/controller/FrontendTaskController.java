@@ -43,4 +43,11 @@ public class FrontendTaskController {
         taskService.deleteTask(taskId);
         return "redirect:/frontend/tasks";  // Redirect back to tasks view after deletion
     }
+
+    @PostMapping("/update/task/{taskId}")
+    public String updateTask(@ModelAttribute("taskDto") TaskDto taskDto, @PathVariable Long taskId, Model model){
+        log.info("Task with id : {}, and request {}", taskId, taskDto);
+        taskService.updateTask(taskId, taskDto);
+        return "redirect:/frontend/tasks";
+    }
 }
