@@ -6,9 +6,11 @@ import com.example.todo_app.repository.TaskRepository;
 import com.example.todo_app.service.TaskService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -20,27 +22,32 @@ public class TaskController {
     private TaskService taskService;
 
     @GetMapping(value = "/tasks")
-    public List<Task> getTasks(
+    public ResponseEntity<List<Task>> getTasks(
             @RequestParam (value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
             @RequestParam (value = "pageSize"  , defaultValue = "5", required = false) Integer pageSize){
-        return taskService.getTasks(pageNumber, pageSize);
+        List<Task> tasks = taskService.getTasks(pageNumber, pageSize);
+        if (tasks.isEmpty()) {
+            return ResponseEntity.noContent().build(); // 204 No Content
+        }
+
+        return ResponseEntity.of(Optional.of(tasks));
     }
 
     @PostMapping(value = "/task")
-    public Task addTask(@RequestBody TaskDto taskDto){
+    public ResponseEntity<Task> addTask(@RequestBody TaskDto taskDto){
         log.info("Received task dto : {}", taskDto);
-        return taskService.addTask(taskDto);
+        return ResponseEntity.ok(taskService.addTask(taskDto));
     }
 
     @PutMapping(value = "/task/{taskId}")
-    public Task updateTask(@RequestBody TaskDto taskDto, @PathVariable Long taskId){
+    public ResponseEntity<Task> updateTask(@RequestBody TaskDto taskDto, @PathVariable Long taskId){
         log.info("Task with id : {}, and request {}", taskId, taskDto);
-        return taskService.updateTask(taskId, taskDto);
+        return ResponseEntity.ok(taskService.updateTask(taskId, taskDto));
     }
 
     @DeleteMapping(value = "/task/{taskId}")
-    public String deleteTask(@PathVariable Long taskId){
+    public ResponseEntity<String> deleteTask(@PathVariable Long taskId){
         log.info("Task Deletion request with id: {}", taskId);
-        return taskService.deleteTask(taskId);
+        return ResponseEntity.ok(taskService.deleteTask(taskId));
     }
 }
