@@ -20,8 +20,10 @@ public class TaskController {
     private TaskService taskService;
 
     @GetMapping(value = "/tasks")
-    public List<Task> getTasks(){
-        return taskService.getTasks();
+    public List<Task> getTasks(
+            @RequestParam (value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
+            @RequestParam (value = "pageSize"  , defaultValue = "5", required = false) Integer pageSize){
+        return taskService.getTasks(pageNumber, pageSize);
     }
 
     @PostMapping(value = "/task")
