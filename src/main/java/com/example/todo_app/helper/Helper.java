@@ -24,37 +24,38 @@ public class Helper {
     public static Integer HEADER_ROW = 0;
 
     public static ByteArrayInputStream dataToExcel(List<Task> tasks){
-        try {
-            Workbook workbook = new XSSFWorkbook();
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
-            //Create Sheet
-            Sheet sheet = workbook.createSheet(SHEET_NAME);
+            try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(); // auto-closeable resource
+                 XSSFWorkbook workbook = new XSSFWorkbook())
+            { // auto-closeable resource
 
-            //Header rows
-            Row row = sheet.createRow(HEADER_ROW);
+                //Create Sheet
+                Sheet sheet = workbook.createSheet(SHEET_NAME);
 
-            for(int i=0; i<HEADERS.length; i++){
-                Cell cell = row.createCell(i);
-                cell.setCellValue(HEADERS[i]);
-            }
+                //Header rows
+                Row row = sheet.createRow(HEADER_ROW);
 
-            // Add Task Data
-            int rowIndex = 1;
-            for (Task task : tasks) {
-                Row dataRow = sheet.createRow(rowIndex++);
+                for(int i=0; i<HEADERS.length; i++){
+                    Cell cell = row.createCell(i);
+                    cell.setCellValue(HEADERS[i]);
+                }
 
-                // Set the cell values based on the task fields
-                dataRow.createCell(0).setCellValue(task.getTaskDescription());
-                dataRow.createCell(1).setCellValue(task.getTaskStatus().name());  // TaskStatus is an enum
-                dataRow.createCell(2).setCellValue(task.getTaskPriority().name()); // Priority is an enum
-            }
+                // Add Task Data
+                int rowIndex = 1;
+                for (Task task : tasks) {
+                    Row dataRow = sheet.createRow(rowIndex++);
 
-            // Convert to binary data
-            workbook.write(byteArrayOutputStream);
+                    // Set the cell values based on the task fields
+                    dataRow.createCell(0).setCellValue(task.getTaskDescription());
+                    dataRow.createCell(1).setCellValue(task.getTaskStatus().name());  // TaskStatus is an enum
+                    dataRow.createCell(2).setCellValue(task.getTaskPriority().name()); // Priority is an enum
+                }
 
-            // ByteArrayInputStream expects binary data
-            return new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+                // Convert to binary data
+                workbook.write(byteArrayOutputStream);
+
+                // ByteArrayInputStream expects binary data
+                return new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
