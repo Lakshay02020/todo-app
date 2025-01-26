@@ -39,12 +39,20 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public Task addTask(TaskDto taskDto){
-        Task task = new Task();
-        task.setTaskDescription(taskDto.getTaskDescription());
-        task.setTaskStatus(TaskStatus.valueOf(taskDto.getTaskStatus()));
-        task.setTaskPriority(Priority.valueOf(taskDto.getTaskPriority()));
-        taskRepository.save(task);
-        return task;
+        try {
+            Task task = new Task();
+            task.setTaskDescription(taskDto.getTaskDescription());
+            task.setTaskStatus(TaskStatus.valueOf(taskDto.getTaskStatus()));
+            task.setTaskPriority(Priority.valueOf(taskDto.getTaskPriority()));
+            taskRepository.save(task);
+            return task;
+        } catch (IllegalArgumentException e) {
+            log.error("Invalid task data provided: {}", taskDto, e);
+            throw e; // Re-throw exception for proper error handling
+        } catch (Exception e) {
+            log.error("Unexpected error while saving task: {}", taskDto, e);
+            throw new RuntimeException("Failed to add task. Please try again later.", e);
+        }
     }
 
     @Override
