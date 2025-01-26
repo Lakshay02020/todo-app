@@ -1,5 +1,6 @@
 package com.example.todo_app.controller;
 
+import com.example.todo_app.service.EmailService;
 import com.example.todo_app.service.FileService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.ByteArrayInputStream;
@@ -20,6 +22,9 @@ public class FileController {
 
     @Autowired
     FileService fileService;
+
+    @Autowired
+    EmailService emailService;
 
     @GetMapping("/resource")
     public ResponseEntity<Resource> download() {
@@ -35,4 +40,8 @@ public class FileController {
         return response;
     }
 
+    @PostMapping("/sendEmail")
+    public void sendMail(){
+        emailService.sendEmail();
+    }
 }
