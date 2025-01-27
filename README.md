@@ -35,6 +35,5 @@ Backend: Spring Boot
 
 Build Tool: Maven
 
-Database: H2 (In-memory)
+Database: PostgreSql
 
-Excel Export: Apache POI
