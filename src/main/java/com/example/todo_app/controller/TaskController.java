@@ -22,10 +22,10 @@ public class TaskController {
     private TaskService taskService;
 
     @GetMapping(value = "/tasks")
-    public ResponseEntity<List<Task>> getTasks(
+    public ResponseEntity<List<TaskDto>> getTasks(
             @RequestParam (value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
             @RequestParam (value = "pageSize"  , defaultValue = "5", required = false) Integer pageSize){
-        List<Task> tasks = taskService.getTasks(pageNumber, pageSize);
+        List<TaskDto> tasks = taskService.getTasks(pageNumber, pageSize);
         if (tasks.isEmpty()) {
             return ResponseEntity.noContent().build(); // 204 No Content
         }

@@ -32,4 +32,7 @@ public class Task {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(name = "deadline", nullable = true)
+    private LocalDateTime deadline; // Deadline for the task
 }
