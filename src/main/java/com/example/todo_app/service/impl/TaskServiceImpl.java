@@ -20,10 +20,13 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static com.example.todo_app.constants.AppConstants.TASK_ENTITY;
 
 @Slf4j
 @Service
@@ -43,10 +46,17 @@ public class TaskServiceImpl implements TaskService {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         Page<Task> pagesOfTask = taskRepository.findAll(pageable);
         List<Task> tasks = pagesOfTask.getContent();
-
         // Convert to Dto
-        List<TaskDto> taskDtos = tasks.stream().map(TaskConverter::entityToDto).toList();
-        log.info("List of tasks on page no {}, Tasks: {}", pageNumber, tasks);
+        List<TaskDto> taskDtos = new ArrayList<>();
+
+        for(Task task: tasks){
+            TaskDto taskDto = TaskConverter.entityToDto(task);
+            List<TaskDto> subTasks = getSubTasks(task);
+            taskDto.setSubtasks(subTasks);
+            taskDtos.add(taskDto);
+        }
+
+        log.info("List of tasks on page no {}, Tasks: {}", pageNumber, taskDtos);
 
         return taskDtos;
     }
@@ -54,9 +64,19 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public Task addTask(TaskDto taskDto){
         try {
-            Task task = taskConverter.dtoToEntity(taskDto);
-            taskRepository.save(task);
-            return task;
+            log.info("Request to add task received: {}", taskDto);
+            Task newTask = taskConverter.dtoToEntity(taskDto);
+            if(taskDto.getParentTaskId() != null){
+                Optional<Task> parentTask = taskRepository.findById(taskDto.getParentTaskId());
+                if(parentTask.isPresent()){
+                    newTask.setParentTask(parentTask.get());
+                    List<Task> subTasksOfParentTask = parentTask.get().getSubtasks();
+                    parentTask.get().setSubtasks(subTasksOfParentTask);
+                }else
+                    throw new EntityNotFoundException(TASK_ENTITY, taskDto.getParentTaskId().toString());
+            }
+            taskRepository.save(newTask);
+            return newTask;
         } catch (IllegalArgumentException e) {
             log.error("Invalid task data provided: {}", taskDto, e);
             throw e; // Re-throw exception for proper error handling
@@ -67,11 +87,11 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Task updateTask(long taskId ,TaskDto taskDto){
+    public Task updateTask(Long taskId ,TaskDto taskDto){
         Optional<Task> getTask = taskRepository.findById(taskId);
 
         if(getTask.isEmpty()){
-            throw new EntityNotFoundException("Task", String.valueOf(taskId));
+            throw new EntityNotFoundException(TASK_ENTITY, String.valueOf(taskId));
         }
 
         Task task = getTask.get();
@@ -83,17 +103,25 @@ public class TaskServiceImpl implements TaskService {
             task.setTaskStatus(TaskStatus.valueOf(taskDto.getTaskStatus()));
         }
 
+        if (!StringUtil.isNullOrEmpty(taskDto.getTaskPriority())) {
+            task.setTaskPriority(Priority.valueOf(taskDto.getTaskPriority()));
+        }
+
+        if (taskDto.getDeadline() != null) {
+            task.setDeadline(taskDto.getDeadline());
+        }
+
         taskRepository.save(task);
         log.info("Update Successful: {}", task);
         return task;
     }
 
     @Override
-    public String deleteTask(long taskId){
+    public String deleteTask(Long taskId){
         Optional<Task> getTask = taskRepository.findById(taskId);
 
         if(getTask.isEmpty()){
-            throw new EntityNotFoundException("Task", String.valueOf(taskId));
+            throw new EntityNotFoundException(TASK_ENTITY, String.valueOf(taskId));
         }
 
         taskRepository.delete(getTask.get());
@@ -110,8 +138,22 @@ public class TaskServiceImpl implements TaskService {
         List<Task> tasks = taskRepository.findByDeadlineBetweenAndTaskStatusNot(now, oneHourFromNow, TaskStatus.COMPLETED);
         for(Task task: tasks){
             log.info("Task with task id: {} and current status: {}", task.getTaskId(), task.getTaskStatus());
-            emailService.sendEmail("lakshay02singla@gmail.com", task.getTaskDescription(), "DEADLINE NOTIFICATION");
+
+            String subject = "⏳ Reminder: Upcoming Task Deadline - " + task.getTaskDescription();
+            String text = "Dear User,\n\n"
+                    + "This is a friendly reminder that your task **\"" + task.getTaskDescription() + "\"** "
+                    + "is approaching its deadline on **" + task.getDeadline() + "**.\n\n"
+                    + "Please ensure that you complete it on time to stay on track.\n\n"
+                    + "Best regards,\n"
+                    + "Your TODO App Team";
+
+            emailService.sendEmail("xyz@gmail.com", text, subject);
             log.info("Email Sent successfully");
         }
     };
+
+    public List<TaskDto> getSubTasks(Task task){
+        List<Task> tasks = taskRepository.findAllByParentTask(task);
+        return tasks.stream().map(TaskConverter::entityToDto).toList();
+    }
 }
