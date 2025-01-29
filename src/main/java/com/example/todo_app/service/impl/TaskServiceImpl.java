@@ -26,6 +26,8 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.example.todo_app.constants.AppConstants.TASK_ENTITY;
+
 @Slf4j
 @Service
 public class TaskServiceImpl implements TaskService {
@@ -70,7 +72,8 @@ public class TaskServiceImpl implements TaskService {
                     newTask.setParentTask(parentTask.get());
                     List<Task> subTasksOfParentTask = parentTask.get().getSubtasks();
                     parentTask.get().setSubtasks(subTasksOfParentTask);
-                }
+                }else
+                    throw new EntityNotFoundException(TASK_ENTITY, taskDto.getParentTaskId().toString());
             }
             taskRepository.save(newTask);
             return newTask;
@@ -88,7 +91,7 @@ public class TaskServiceImpl implements TaskService {
         Optional<Task> getTask = taskRepository.findById(taskId);
 
         if(getTask.isEmpty()){
-            throw new EntityNotFoundException("Task", String.valueOf(taskId));
+            throw new EntityNotFoundException(TASK_ENTITY, String.valueOf(taskId));
         }
 
         Task task = getTask.get();
@@ -98,6 +101,14 @@ public class TaskServiceImpl implements TaskService {
 
         if(!StringUtil.isNullOrEmpty(taskDto.getTaskStatus())){
             task.setTaskStatus(TaskStatus.valueOf(taskDto.getTaskStatus()));
+        }
+
+        if (!StringUtil.isNullOrEmpty(taskDto.getTaskPriority())) {
+            task.setTaskPriority(Priority.valueOf(taskDto.getTaskPriority()));
+        }
+
+        if (taskDto.getDeadline() != null) {
+            task.setDeadline(taskDto.getDeadline());
         }
 
         taskRepository.save(task);
@@ -110,7 +121,7 @@ public class TaskServiceImpl implements TaskService {
         Optional<Task> getTask = taskRepository.findById(taskId);
 
         if(getTask.isEmpty()){
-            throw new EntityNotFoundException("Task", String.valueOf(taskId));
+            throw new EntityNotFoundException(TASK_ENTITY, String.valueOf(taskId));
         }
 
         taskRepository.delete(getTask.get());
@@ -127,7 +138,16 @@ public class TaskServiceImpl implements TaskService {
         List<Task> tasks = taskRepository.findByDeadlineBetweenAndTaskStatusNot(now, oneHourFromNow, TaskStatus.COMPLETED);
         for(Task task: tasks){
             log.info("Task with task id: {} and current status: {}", task.getTaskId(), task.getTaskStatus());
-            emailService.sendEmail("lakshay02singla@gmail.com", task.getTaskDescription(), "DEADLINE NOTIFICATION");
+
+            String subject = "⏳ Reminder: Upcoming Task Deadline - " + task.getTaskDescription();
+            String text = "Dear User,\n\n"
+                    + "This is a friendly reminder that your task **\"" + task.getTaskDescription() + "\"** "
+                    + "is approaching its deadline on **" + task.getDeadline() + "**.\n\n"
+                    + "Please ensure that you complete it on time to stay on track.\n\n"
+                    + "Best regards,\n"
+                    + "Your TODO App Team";
+
+            emailService.sendEmail("xyz@gmail.com", text, subject);
             log.info("Email Sent successfully");
         }
     };
