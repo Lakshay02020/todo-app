@@ -20,6 +20,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -43,10 +44,17 @@ public class TaskServiceImpl implements TaskService {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         Page<Task> pagesOfTask = taskRepository.findAll(pageable);
         List<Task> tasks = pagesOfTask.getContent();
-
         // Convert to Dto
-        List<TaskDto> taskDtos = tasks.stream().map(TaskConverter::entityToDto).toList();
-        log.info("List of tasks on page no {}, Tasks: {}", pageNumber, tasks);
+        List<TaskDto> taskDtos = new ArrayList<>();
+
+        for(Task task: tasks){
+            TaskDto taskDto = TaskConverter.entityToDto(task);
+            List<TaskDto> subTasks = getSubTasks(task);
+            taskDto.setSubtasks(subTasks);
+            taskDtos.add(taskDto);
+        }
+
+        log.info("List of tasks on page no {}, Tasks: {}", pageNumber, taskDtos);
 
         return taskDtos;
     }
@@ -54,9 +62,18 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public Task addTask(TaskDto taskDto){
         try {
-            Task task = taskConverter.dtoToEntity(taskDto);
-            taskRepository.save(task);
-            return task;
+            log.info("Request to add task received: {}", taskDto);
+            Task newTask = taskConverter.dtoToEntity(taskDto);
+            if(taskDto.getParentTaskId() != null){
+                Optional<Task> parentTask = taskRepository.findById(taskDto.getParentTaskId());
+                if(parentTask.isPresent()){
+                    newTask.setParentTask(parentTask.get());
+                    List<Task> subTasksOfParentTask = parentTask.get().getSubtasks();
+                    parentTask.get().setSubtasks(subTasksOfParentTask);
+                }
+            }
+            taskRepository.save(newTask);
+            return newTask;
         } catch (IllegalArgumentException e) {
             log.error("Invalid task data provided: {}", taskDto, e);
             throw e; // Re-throw exception for proper error handling
@@ -67,7 +84,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Task updateTask(long taskId ,TaskDto taskDto){
+    public Task updateTask(Long taskId ,TaskDto taskDto){
         Optional<Task> getTask = taskRepository.findById(taskId);
 
         if(getTask.isEmpty()){
@@ -89,7 +106,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public String deleteTask(long taskId){
+    public String deleteTask(Long taskId){
         Optional<Task> getTask = taskRepository.findById(taskId);
 
         if(getTask.isEmpty()){
@@ -114,4 +131,9 @@ public class TaskServiceImpl implements TaskService {
             log.info("Email Sent successfully");
         }
     };
+
+    public List<TaskDto> getSubTasks(Task task){
+        List<Task> tasks = taskRepository.findAllByParentTask(task);
+        return tasks.stream().map(TaskConverter::entityToDto).toList();
+    }
 }
