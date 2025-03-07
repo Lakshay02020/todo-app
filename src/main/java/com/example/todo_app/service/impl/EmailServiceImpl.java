@@ -1,13 +1,21 @@
 package com.example.todo_app.service.impl;
 
 import com.example.todo_app.service.EmailService;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 import static com.example.todo_app.constants.AppConstants.SYSTEM_MAIL;
 
@@ -27,5 +35,28 @@ public class EmailServiceImpl implements EmailService {
 
         javaMailSender.send(message);
         log.info("Mail sent successfully: {}", message);
+    }
+
+    @Override
+    public void sendEmailWithAttachment(String toEmail, String text, String subject, MultipartFile file) {
+        try {
+            MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
+
+            helper.setFrom(SYSTEM_MAIL);
+            helper.setTo(toEmail);
+            helper.setSubject(subject);
+            helper.setText(text);
+
+            // Attach file
+            if (file != null && !file.isEmpty()) {
+                helper.addAttachment(file.getOriginalFilename(), new ByteArrayResource(file.getBytes()));
+            }
+
+            javaMailSender.send(mimeMessage);
+            log.info("Mail with attachment sent successfully to {}", toEmail);
+        } catch (MessagingException | IOException e) {
+            log.error("Failed to send email with attachment", e);
+        }
     }
 }

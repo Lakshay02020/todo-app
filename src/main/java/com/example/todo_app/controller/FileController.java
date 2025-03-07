@@ -10,10 +10,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -42,13 +40,18 @@ public class FileController {
         return response;
     }
 
-    @PostMapping("/sendEmail")
+    @PostMapping(value = "/sendEmail", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<String> sendMail(
             @RequestParam String toEmail,
             @RequestParam String text,
-            @RequestParam String subject) {
+            @RequestParam String subject,
+            @RequestPart(required = false) MultipartFile resource) {
         try {
-            emailService.sendEmail(toEmail, text, subject);
+            log.info("Request received to send email to {} with subject {} and text {}", toEmail, text, subject);
+            if (resource != null && !resource.isEmpty())
+                emailService.sendEmailWithAttachment(toEmail, text, subject, resource);
+            else
+                emailService.sendEmail(toEmail, text, subject);
             return ResponseEntity.ok("Email sent successfully to " + toEmail);
         } catch (Exception e) {
             // Log the error for debugging purposes
